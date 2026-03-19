@@ -1,1 +1,54 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruleta Sorteo</title>
+</head>
+<body>
+
+<h1>Participantes</h1>
+<button onclick="cargarDatos()">Actualizar lista</button>
+<ul id="lista"></ul>
+
+<button onclick="sortear()">Girar ruleta</button>
+<h2 id="ganador"></h2>
+
+<script>
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR43A2eiylRV5iUoMHuzP_0cCvW0edFzQCiDJJaCh48ew6FZ3WtqsfoMY47VMC_CGVOuXdxxrzDgh9E/pub?gid=861121657&single=true&output=csv";
+
+let nombres = [];
+
+async function cargarDatos() {
+  const res = await fetch(url);
+  const data = await res.text();
+
+  const filas = data.split("\n").slice(1); // omitir encabezado
+
+  nombres = filas
+    .map(f => f.split(",")[1]) // columna nombre
+    .filter(n => n);
+
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  nombres.forEach(n => {
+    const li = document.createElement("li");
+    li.textContent = n;
+    lista.appendChild(li);
+  });
+}
+
+function sortear() {
+  if (nombres.length === 0) {
+    alert("Carga los datos primero");
+    return;
+  }
+
+  const ganador = nombres[Math.floor(Math.random() * nombres.length)];
+  document.getElementById("ganador").textContent = "Ganador: " + ganador;
+}
+</script>
+
+</body>
+</html>
