@@ -51,7 +51,7 @@
 
         .btn-register {
             position: absolute;
-            right: 40px; /* CORRECCIÓN: Separado del borde (antes era 20px) */
+            right: 40px;
             top: 50%;
             transform: translateY(-50%);
             background: linear-gradient(135deg, #3b82f6, #2563eb);
@@ -190,7 +190,6 @@
             background: #ecfdf5;
         }
 
-        /* NUEVO: Estilo para el botón de limpiar ganadores */
         .btn-clear {
             background: #fee2e2;
             color: #ef4444;
@@ -344,7 +343,6 @@
     const spinBtn = document.getElementById('spinBtn');
     
     let students = [];
-    // NUEVO: Cargar ganadores desde el localStorage al iniciar
     let winners = JSON.parse(localStorage.getItem('sorteo_medicina_ganadores')) || [];
     let currentAngle = 0;
     let isSpinning = false;
@@ -358,20 +356,20 @@
         if (e.target === this) closeQr();
     });
 
-    // NUEVO: Función para limpiar los ganadores guardados
     function clearWinners() {
         if(winners.length === 0) return;
         
         if(confirm("¿Estás seguro de limpiar la lista de ganadores? Estos participantes volverán a ingresar al sorteo.")) {
-            winners = []; // Vaciamos el array
-            localStorage.removeItem('sorteo_medicina_ganadores'); // Lo borramos del navegador
-            fetchData(); // Volvemos a traer a todos los participantes a la ruleta
+            winners = [];
+            localStorage.removeItem('sorteo_medicina_ganadores');
+            fetchData();
         }
     }
 
     async function fetchData() {
         const status = document.getElementById('status');
-        status.textContent = "⌛ Filtrando Medicina Humana...";
+        // MODIFICADO AQUÍ
+        status.textContent = "⌛ Capturando datos...";
         status.style.background = "#e0f2fe";
         status.style.color = "#0369a1";
 
@@ -403,11 +401,13 @@
             spinBtn.disabled = students.length === 0;
             
             if (students.length === 0) {
-                status.textContent = "⚠️ No hay registros de Medicina Humana";
+                // MODIFICADO AQUÍ
+                status.textContent = "⚠️ No hay participantes registrados";
                 status.style.background = "#fff7ed";
                 status.style.color = "#9a3412";
             } else {
-                status.textContent = "";
+                // MODIFICADO AQUÍ
+                status.textContent = "✅ " + students.length + " participantes listos";
                 status.style.background = "#dcfce7";
                 status.style.color = "#166534";
             }
@@ -538,7 +538,6 @@
             if (Date.now() < end) requestAnimationFrame(frame);
         }());
 
-        // NUEVO: Guardar en localStorage
         winners.unshift(winner);
         localStorage.setItem('sorteo_medicina_ganadores', JSON.stringify(winners));
         
@@ -560,7 +559,6 @@
     
     function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
     
-    // El script ahora carga automáticamente llamando a fetchData al iniciar
     window.onload = () => { fetchData(); };
 </script>
 </body>
