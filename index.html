@@ -49,7 +49,6 @@
             font-weight: 600;
         }
 
-        /* NUEVO: Botón llamativo de registro */
         .btn-register {
             position: absolute;
             right: 20px;
@@ -105,7 +104,8 @@
             max-height: 85vw;
         }
 
-        canvas {
+        /* CORRECCIÓN: Ahora solo afecta a la ruleta y no al confeti */
+        #wheelCanvas {
             width: 100%;
             height: 100%;
             border-radius: 50%;
@@ -166,7 +166,7 @@
             padding: 0;
             margin: 10px 0;
             overflow-y: auto;
-            flex: 1; /* Permite que las listas compartan el espacio disponible */
+            flex: 1;
             border: 1px solid #f1f5f9;
             border-radius: 10px;
             padding: 10px;
@@ -191,7 +191,6 @@
             background: #ecfdf5;
         }
 
-        /* MODIFICADO: Ventana de ganador elegante (ya no es un óvalo) */
         #winner-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -206,7 +205,7 @@
         .winner-card {
             background: white;
             padding: 40px;
-            border-radius: 16px; /* Borde rectangular suave */
+            border-radius: 16px;
             text-align: center;
             max-width: 450px;
             width: 90%;
@@ -223,7 +222,6 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* NUEVO: Modal para el QR */
         #qr-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -323,7 +321,6 @@
 </div>
 
 <script>
-    // URL de tu Google Sheet publicada como CSV
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSf9OnFn7lKRhRvp1iJjMV7CH6_W_4Yw_chE_M-lGoltlTeO9gdCLgHWzkMI_g-w49olveAmiBn96u_/pub?gid=983686650&single=true&output=csv";
     
     const canvas = document.getElementById('wheelCanvas');
@@ -331,18 +328,15 @@
     const spinBtn = document.getElementById('spinBtn');
     
     let students = [];
-    let winners = []; // NUEVO: Array para guardar a los ganadores
+    let winners = [];
     let currentAngle = 0;
     let isSpinning = false;
     
-    // Paleta de colores vibrantes
     const colors = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#f43f5e'];
 
-    // Funciones del Modal QR
     function openQr() { document.getElementById('qr-modal').style.display = 'flex'; }
     function closeQr() { document.getElementById('qr-modal').style.display = 'none'; }
     
-    // Cerrar QR si se hace clic fuera del contenido
     document.getElementById('qr-modal').addEventListener('click', function(e) {
         if (e.target === this) closeQr();
     });
@@ -370,7 +364,6 @@
             }).filter(s => {
                 const esNombreValido = s.nombre.length > 0 || s.apellido.length > 0;
                 const esMedicina = s.escuela.toUpperCase() === "MEDICINA HUMANA";
-                // NUEVO: Asegurarse de que el estudiante no esté ya en la lista de ganadores
                 const noEsGanador = !winners.some(w => w.codigo === s.codigo);
                 return esNombreValido && esMedicina && noEsGanador;
             });
@@ -399,7 +392,6 @@
     }
 
     function updateUI() {
-        // Actualizar Participantes
         document.getElementById('count').textContent = students.length;
         const list = document.getElementById('participants-list');
         list.innerHTML = students.map(s => `
@@ -409,7 +401,6 @@
             </div>
         `).join('');
 
-        // Actualizar Ganadores
         document.getElementById('winner-count').textContent = winners.length;
         const winnersList = document.getElementById('winners-list');
         winnersList.innerHTML = winners.map((w, index) => `
@@ -428,7 +419,6 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (total === 0) {
-            // Dibujar círculo vacío si no hay alumnos
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.fillStyle = "#f1f5f9";
@@ -460,7 +450,6 @@
             ctx.restore();
         });
 
-        // Eje central
         ctx.beginPath();
         ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
         ctx.fillStyle = "white";
@@ -508,12 +497,10 @@
         const realIndex = index % total;
         const winner = students[realIndex];
         
-        // Mostrar datos en el modal
         document.getElementById('winner-name').textContent = winner.nombre + " " + winner.apellido;
         document.getElementById('winner-code').textContent = "CÓDIGO: " + winner.codigo;
         document.getElementById('winner-overlay').style.display = 'flex';
         
-        // Lanzamiento de Confeti
         const duration = 3 * 1000;
         const end = Date.now() + duration;
 
@@ -523,18 +510,16 @@
             if (Date.now() < end) requestAnimationFrame(frame);
         }());
 
-        // NUEVO: Lógica para evitar que se repita
-        winners.unshift(winner); // Agregar al inicio de la lista de ganadores
-        students.splice(realIndex, 1); // Quitar de la lista de participantes
+        winners.unshift(winner);
+        students.splice(realIndex, 1);
 
-        updateUI(); // Actualizar ambas listas en la interfaz
+        updateUI();
     }
 
     function closeWinner() { 
         document.getElementById('winner-overlay').style.display = 'none'; 
-        drawWheel(); // Redibujar la ruleta sin el ganador
+        drawWheel(); 
         
-        // Verificar si quedan participantes
         if (students.length === 0) {
             spinBtn.disabled = true;
             document.getElementById('status').textContent = "⚠️ No hay más participantes para sortear";
