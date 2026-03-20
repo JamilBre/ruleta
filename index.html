@@ -51,7 +51,7 @@
 
         .btn-register {
             position: absolute;
-            right: 20px;
+            right: 40px; /* CORRECCIÓN: Separado del borde (antes era 20px) */
             top: 50%;
             transform: translateY(-50%);
             background: linear-gradient(135deg, #3b82f6, #2563eb);
@@ -104,7 +104,6 @@
             max-height: 85vw;
         }
 
-        /* CORRECCIÓN: Ahora solo afecta a la ruleta y no al confeti */
         #wheelCanvas {
             width: 100%;
             height: 100%;
@@ -189,6 +188,20 @@
         .winner-item {
             border-left: 4px solid var(--success);
             background: #ecfdf5;
+        }
+
+        /* NUEVO: Estilo para el botón de limpiar ganadores */
+        .btn-clear {
+            background: #fee2e2;
+            color: #ef4444;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: none;
+        }
+        .btn-clear:hover {
+            background: #fca5a5;
+            transform: scale(1.05);
         }
 
         #winner-overlay {
@@ -297,7 +310,10 @@
         <h3 style="margin: 0 0 10px 0;">👥 Participantes (<span id="count">0</span>)</h3>
         <div id="participants-list" class="list-container"></div>
         
-        <h3 style="margin: 15px 0 10px 0; color: var(--success);">🏆 Ganadores (<span id="winner-count">0</span>)</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0 10px 0;">
+            <h3 style="margin: 0; color: var(--success);">🏆 Ganadores (<span id="winner-count">0</span>)</h3>
+            <button class="btn-clear" onclick="clearWinners()" title="Limpiar lista de ganadores">🗑️ Limpiar</button>
+        </div>
         <div id="winners-list" class="list-container"></div>
     </div>
 </div>
@@ -328,7 +344,8 @@
     const spinBtn = document.getElementById('spinBtn');
     
     let students = [];
-    let winners = [];
+    // NUEVO: Cargar ganadores desde el localStorage al iniciar
+    let winners = JSON.parse(localStorage.getItem('sorteo_medicina_ganadores')) || [];
     let currentAngle = 0;
     let isSpinning = false;
     
@@ -340,6 +357,17 @@
     document.getElementById('qr-modal').addEventListener('click', function(e) {
         if (e.target === this) closeQr();
     });
+
+    // NUEVO: Función para limpiar los ganadores guardados
+    function clearWinners() {
+        if(winners.length === 0) return;
+        
+        if(confirm("¿Estás seguro de limpiar la lista de ganadores? Estos participantes volverán a ingresar al sorteo.")) {
+            winners = []; // Vaciamos el array
+            localStorage.removeItem('sorteo_medicina_ganadores'); // Lo borramos del navegador
+            fetchData(); // Volvemos a traer a todos los participantes a la ruleta
+        }
+    }
 
     async function fetchData() {
         const status = document.getElementById('status');
@@ -510,9 +538,11 @@
             if (Date.now() < end) requestAnimationFrame(frame);
         }());
 
+        // NUEVO: Guardar en localStorage
         winners.unshift(winner);
+        localStorage.setItem('sorteo_medicina_ganadores', JSON.stringify(winners));
+        
         students.splice(realIndex, 1);
-
         updateUI();
     }
 
@@ -530,7 +560,8 @@
     
     function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
     
-    window.onload = () => { drawWheel(); fetchData(); };
+    // El script ahora carga automáticamente llamando a fetchData al iniciar
+    window.onload = () => { fetchData(); };
 </script>
 </body>
 </html>
